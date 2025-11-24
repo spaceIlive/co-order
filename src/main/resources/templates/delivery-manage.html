@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}"/>
+<body>
+<div class="container">
+    <div th:replace="~{fragments/bodyHeader :: bodyHeader}"></div>
+
+    <div class="py-4">
+        <h2>배달 기사 전용 주문 관리</h2>
+        <p class="text-muted">ORDERED 상태의 공동 주문들만 모아둔 페이지입니다. 원하는 주문을 선택해 배달 기사로 배정하거나 배송 완료 처리를 할 수 있습니다.</p>
+
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+        <div th:if="${#lists.isEmpty(deliveryGroups)}" class="alert alert-info">
+            현재 배정 가능한 주문이 없습니다.
+        </div>
+
+        <div class="row g-4" th:each="group : ${deliveryGroups}">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0" th:text="${group.post.store.name} + ' - ' + ${group.post.id}">Store name</h5>
+                            <small class="text-muted" th:text="'마감 시간 : ' + ${#temporals.format(group.post.deadline, 'yyyy-MM-dd HH:mm')}"></small>
+                        </div>
+                        <span class="badge text-bg-secondary" th:text="${group.groupDelivery.status}">READY</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <p class="mb-1"><strong>배달 기사</strong>
+                                <span th:if="${group.groupDelivery.driverName}" th:text="${group.groupDelivery.driverName + ' / ' + group.groupDelivery.driverContact}"></span>
+                                <span th:if="${group.groupDelivery.driverName == null}">미배정</span>
+                            </p>
+                        </div>
+
+                        <div th:if="${group.groupDelivery.driverName == null}">
+                            <form th:action="@{'/deliveries/' + ${group.post.id} + '/assign'}" method="post" class="row g-2">
+                                <div class="col-md-4">
+                                    <input type="text" name="driverName" class="form-control" placeholder="기사 이름" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" name="driverContact" class="form-control" placeholder="연락처" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-primary w-100">배달기사 배정</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div th:if="${group.groupDelivery.driverName != null}" class="d-flex gap-2">
+                            <form th:action="@{'/deliveries/' + ${group.post.id} + '/complete'}" method="post">
+                                <button type="submit" class="btn btn-success">배송 완료 처리</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                            <tr>
+                                <th>참여자</th>
+                                <th>배송지</th>
+                                <th>주문 총액</th>
+                                <th>배송 상태</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="order : ${group.orders}">
+                                <td th:text="${order.member.name}">홍길동</td>
+                                <td>
+                                    <div th:text="${order.delivery.address.address}">서울시 ...</div>
+                                    <small class="text-muted" th:text="'(' + ${order.delivery.address.latitude} + ', ' + ${order.delivery.address.longitude} + ')'"></small>
+                                </td>
+                                <td th:text="${#numbers.formatInteger(order.totalPrice, 3, 'COMMA')} + '원'">0원</td>
+                                <td>
+                                    <span class="badge text-bg-light" th:text="${order.delivery.status}">READY</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
+

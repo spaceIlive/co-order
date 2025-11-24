@@ -19,11 +19,24 @@ public class GroupDelivery {
     @Enumerated(EnumType.STRING)
     private GroupDeliveryStatus status;
 
+    private String driverName;
+    private String driverContact;
+
     public static GroupDelivery createGroupDelivery(Post post) {
         GroupDelivery groupDelivery = new GroupDelivery();
         groupDelivery.post = post;
         groupDelivery.status = GroupDeliveryStatus.READY;
         return groupDelivery;
+    }
+
+    public void assignDriver(String name, String contact) {
+        this.driverName = name;
+        this.driverContact = contact;
+        this.status = GroupDeliveryStatus.IN_PROGRESS;
+    }
+
+    public void markCompleted() {
+        this.status = GroupDeliveryStatus.COMPLETED;
     }
 }
 

@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import gwan.co_order.domain.DeliveryStatus;
 
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class DeliveryRepository {
@@ -24,6 +26,12 @@ public class DeliveryRepository {
         Delivery delivery = findDeliveryById(deliveryId);
         delivery.setStatus(status);
         em.merge(delivery);
+    }
+
+    public List<Delivery> findDeliveriesByGroupDeliveryId(Long groupDeliveryId) {
+        return em.createQuery("select d from Delivery d where d.groupDelivery.id = :groupId", Delivery.class)
+                .setParameter("groupId", groupDeliveryId)
+                .getResultList();
     }
 
     public void deleteDelivery(Delivery delivery) {

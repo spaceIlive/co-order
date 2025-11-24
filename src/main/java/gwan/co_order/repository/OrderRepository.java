@@ -26,4 +26,14 @@ public class OrderRepository {
                 .setParameter("memberId", memberId)
                 .getResultList();
     }
+
+    public List<Order> findOrdersByGroupDeliveryId(Long groupDeliveryId) {
+        return em.createQuery(
+                        "select o from Order o " +
+                                "join fetch o.member " +
+                                "join fetch o.delivery d " +
+                                "where d.groupDelivery.id = :groupId", Order.class)
+                .setParameter("groupId", groupDeliveryId)
+                .getResultList();
+    }
 }

@@ -154,6 +154,10 @@
   - 개별 배송지 주소 (Participation에서 스냅샷한 Address)
   - 개별 배송 상태 (READY/COMP)
 - **장점**: 같은 Post의 모든 Order가 한 배달원에게 배정되면서도, 각자 다른 배송지 유지
+- **배달 기사 관리 페이지** (`/deliveries/manage`):
+  - ORDERED 상태 모집글만 모아 기사 전용 화면에서 확인
+  - 기사 이름/연락처 입력 후 그룹 단위 배정, GroupDelivery/Delivery 상태를 DELIVERING으로 전환
+  - 배정 후 “배송 완료 처리” 버튼으로 GroupDelivery/Delivery를 COMPLETED로 업데이트하며 참여자별 배송 현황(주소·총액·상태)을 표로 확인
 
 ---
 
@@ -253,6 +257,7 @@
 │  - OrderController                    │
 │  - StoreController                    │
 │  - ProductController                  │
+│  - DeliveryController                 │
 └───────────────┬───────────────────────┘
                 ↓
 ┌──────────────────────────────────────┐
@@ -331,9 +336,13 @@
   - 중복 참여 체크 (회원ID + PostID)
 - ✅ ParticipationProductRepository
 - ✅ OrderRepository
+  - 주문 저장/조회 (회원별, GroupDelivery별)
 - ✅ OrderProductRepository
+  - OrderProduct 스냅샷 저장
 - ✅ GroupDeliveryRepository
+  - GroupDelivery 단건 및 Post 상태별 조회
 - ✅ DeliveryRepository
+  - Delivery 저장/조회/상태 업데이트, GroupDelivery별 조회
 
 #### Service 계층
 - ✅ MemberService
@@ -354,7 +363,11 @@
   - 상품 추가
   - 내 참여 목록 조회 (상태별 그룹화: 모집중/완료됨/취소됨)
 - ✅ OrderService (주문 생성/조회)
+  - WAITING_ORDER → ORDERED 전환 시 GroupDelivery/Delivery/Order 생성
+  - ParticipationProduct → OrderProduct 변환 및 totalPrice 계산
 - ✅ DeliveryService (배송 관리)
+  - 배달기사 배정/완료 처리, GroupDelivery & Delivery 상태 변경
+  - 배달 관리 페이지용 DeliveryGroupView 데이터 제공
 
 #### Controller 계층
 - ✅ **HomeController**
@@ -393,6 +406,11 @@
 
 - ✅ **OrderController**
   - `GET /orders`: 내 주문 조회 (상태별 분류: 모집중/완료됨/취소됨, 세션 에러 메시지 표시)
+  
+- ✅ **DeliveryController**
+  - `GET /deliveries/manage`: 배달기사 전용 ORDERED 모집글 목록 페이지
+  - `POST /deliveries/{postId}/assign`: 기사 이름/연락처 입력 후 GroupDelivery 배정
+  - `POST /deliveries/{postId}/complete`: 해당 그룹 배송 완료 처리
 
 #### Form 객체 및 DTO
 - ✅ **Form 객체**: 폼 데이터 바인딩 및 검증
@@ -401,6 +419,7 @@
   - PostForm (모집글 작성)
   - StoreForm (가게 등록)
   - MemberForm (회원가입, 비밀번호 확인 검증)
+  - DriverAssignmentForm (배달기사 배정 입력)
 - ✅ **ProductDto**: Ajax API 응답용 (JavaScript JSON 변환)
 
 #### View 계층 (Thymeleaf)
@@ -415,6 +434,7 @@
 - ✅ product-register.html (상품 등록)
 - ✅ product-edit.html (상품 수정)
 - ✅ my-orders.html (내 주문 조회)
+- ✅ delivery-manage.html (배달기사 전용 관리 화면)
 
 #### Policy 계층
 - ✅ MinParticipantsPolicy (최소 인원 계산)
@@ -515,6 +535,11 @@
        * OrderProduct들 생성 (상품/가격 스냅샷)
        * totalPrice 자동 계산
      - Post 상태: WAITING_ORDER → ORDERED
+
+5. 배달 기사 배정 (배달 전용 페이지 수동 처리)
+   - `/deliveries/manage`에서 ORDERED 모집글 목록 확인
+   - 기사 정보 입력 후 GroupDelivery에 배정 → GroupDelivery/Delivery 상태: IN_PROGRESS/DELIVERING
+   - 배송 완료 시 버튼으로 GroupDelivery/Delivery 상태를 COMPLETED로 전환
 
 배달 구조:
 Post 1개
