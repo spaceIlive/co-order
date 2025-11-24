@@ -624,12 +624,5 @@ H2 데이터베이스 콘솔 접속:
    - 애플리케이션 재시작 시 `ddl-auto: create` 설정으로 인해 모든 데이터가 삭제되고 재생성됩니다
    - 테스트용 초기 데이터는 `data.sql`에서 자동으로 삭제됩니다
 
-3. **테스트 실행**
-   ```bash
-   # Mac/Linux
-   ./gradlew test
-
-   # Windows
-   gradlew.bat test
-   ```
-
+3. **H2 DB 먼저 실행**
+    -어플리케이션 실행 전에 DB를 먼저 로컬에서 실행시켜야한다.
