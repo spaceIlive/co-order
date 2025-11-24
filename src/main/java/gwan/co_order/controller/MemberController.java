@@ -77,6 +77,41 @@ public class MemberController {
             return "member-register";
         }
     }
+
+    // 회원 주소 수정
+
+    @GetMapping("/members/address")
+    public String editAddressForm(HttpSession session, Model model) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            return "redirect:/login";
+        }
+
+        Address currentAddress = memberService.findAddress(memberId);
+        MemberAddressForm addressForm = MemberAddressForm.from(currentAddress);
+        model.addAttribute("addressForm", addressForm);
+        return "member-address-edit";
+    }
+
+    @PostMapping("/members/address")
+    public String updateAddress(@Valid MemberAddressForm form,
+                                BindingResult result,
+                                HttpSession session,
+                                Model model) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            return "redirect:/login";
+        }
+
+        if (result.hasErrors()) {
+            model.addAttribute("addressForm", form);
+            return "member-address-edit";
+        }
+
+        Address newAddress = new Address(form.getAddress(), form.getLatitude(), form.getLongitude());
+        memberService.updateAddress(memberId, newAddress);
+        return "redirect:/?addressUpdated=true";
+    }
 }
 
 
