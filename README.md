@@ -215,16 +215,16 @@
 
 ---
 
-## 정책(Policy) 구조
+### 정책(Policy) 구조
 
-### 최소 인원 계산 정책
+#### 최소 인원 계산 정책
 - **MinParticipantsPolicy**: 최소 필요 인원 계산 인터페이스
 - **DeliveryFeeBasedMinParticipantsPolicy**: 배달비 기반 구현체
   - 거리(Haversine 공식) 기반 배달비 계산
   - 기본 배달비 3000원 + km당 500원
   - 목표 1인당 배달비 1000원 기준으로 최소 인원 산출
 
-### 게시글 스캔 범위 정책
+#### 게시글 스캔 범위 정책
 - **PostScanRangePolicy**: 주변 게시글 검색 범위 인터페이스
 - **FixedRadiusScanRangePolicy**: 고정 반경 구현체
   - 기본 1km 반경 검색
@@ -232,9 +232,9 @@
 
 ---
 
-## 아키텍처 구조
+### 아키텍처 구조
 
-### 계층 구조
+#### 계층 구조
 ```
 ┌───────────────────────────────────────┐
 │          View 계층                     │
@@ -299,12 +299,11 @@
 │  - MinParticipantsPolicy             │
 │  - PostScanRangePolicy               │
 └──────────────────────────────────────┘
-```
 
 **참고**: Form 객체(MemberForm, PostForm 등)는 폼 데이터 바인딩 및 검증에 사용되며, ProductDto는 Ajax API 응답용으로만 사용됩니다.
 ```
 
-### 주요 설계 원칙
+#### 주요 설계 원칙
 1. **단방향 참조**: 자식 → 부모만 참조, 양방향 참조 지양
 2. **계층 분리**: View → Controller → Scheduler → Service → Repository → Domain
 3. **정책 패턴**: 비즈니스 규칙을 인터페이스로 추상화
@@ -314,9 +313,9 @@
 
 ---
 
-## 구현 현황
+### 구현 현황
 
-### Repository 계층
+#### Repository 계층
 - ✅ MemberRepository
   - 회원 조회 (ID, 이름)
   - 로그인용 회원 조회 (예외 처리 포함)
@@ -336,7 +335,7 @@
 - ✅ GroupDeliveryRepository
 - ✅ DeliveryRepository
 
-### Service 계층
+#### Service 계층
 - ✅ MemberService
   - 회원 등록 (이름 중복 체크)
   - 로그인 (ID/비밀번호 검증, 예외 메시지 구분)
@@ -357,7 +356,7 @@
 - ✅ OrderService (주문 생성/조회)
 - ✅ DeliveryService (배송 관리)
 
-### Controller 계층
+#### Controller 계층
 - ✅ **HomeController**
   - `GET /`: 메인 대시보드 (세션 체크, 미로그인 시 리다이렉트)
 
@@ -395,7 +394,7 @@
 - ✅ **OrderController**
   - `GET /orders`: 내 주문 조회 (상태별 분류: 모집중/완료됨/취소됨, 세션 에러 메시지 표시)
 
-### Form 객체 및 DTO
+#### Form 객체 및 DTO
 - ✅ **Form 객체**: 폼 데이터 바인딩 및 검증
   - ProductForm (상품 등록/수정, 검증 포함)
   - ParticipationForm (참여 상품 선택)
@@ -404,7 +403,7 @@
   - MemberForm (회원가입, 비밀번호 확인 검증)
 - ✅ **ProductDto**: Ajax API 응답용 (JavaScript JSON 변환)
 
-### View 계층 (Thymeleaf)
+#### View 계층 (Thymeleaf)
 - ✅ Fragments (header, bodyHeader, footer)
 - ✅ index.html (메인 대시보드)
 - ✅ login.html (로그인)
@@ -417,16 +416,16 @@
 - ✅ product-edit.html (상품 수정)
 - ✅ my-orders.html (내 주문 조회)
 
-### Policy 계층
+#### Policy 계층
 - ✅ MinParticipantsPolicy (최소 인원 계산)
   - DeliveryFeeBasedMinParticipantsPolicy (배달비 기반 구현체)
 - ✅ PostScanRangePolicy (스캔 범위 결정)
   - FixedRadiusScanRangePolicy (고정 반경 구현체)
 
-### Scheduler 계층
+#### Scheduler 계층
 - ✅ PostClosureScheduler (마감 자동 처리, 1분마다 실행)
 
-### 주요 기능 구현
+#### 주요 기능 구현
 - ✅ 세션 기반 로그인/로그아웃
 - ✅ 모집글 작성 시 호스트 자동 참여
 - ✅ 중복 참여 방지 (같은 회원이 같은 모집글에 중복 참여 불가)
@@ -634,4 +633,3 @@ H2 데이터베이스 콘솔 접속:
    gradlew.bat test
    ```
 
->>>>>>> fa2d1f0 (feat: initial project import)
