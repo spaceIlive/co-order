@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}" />
+<body>
+<div class="container">
+    <div th:replace="~{fragments/bodyHeader :: bodyHeader}"/>
+    
+    <div class="py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>가게 목록</h2>
+            <a th:href="@{/stores/new}" class="btn btn-primary">가게 등록하기</a>
+        </div>
+        
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>가게명</th>
+                    <th>주소</th>
+                    <th>위치 (위도, 경도)</th>
+                    <th>메뉴 보기</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="store : ${stores}">
+                    <td th:text="${store.name}"></td>
+                    <td th:text="${store.address.address}"></td>
+                    <td th:text="'(' + ${store.address.latitude} + ', ' + ${store.address.longitude} + ')'"></td>
+                    <td>
+                        <a th:href="@{/stores/{id}/products(id=${store.id})}" class="btn btn-sm btn-info text-white">
+                            메뉴 보기
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}" />
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

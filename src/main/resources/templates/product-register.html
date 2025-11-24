@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}" />
+<body>
+<div class="container">
+    <div th:replace="~{fragments/bodyHeader :: bodyHeader}"/>
+    
+    <div class="py-5">
+        <h2>메뉴 등록</h2>
+        
+        <div class="alert alert-info">
+            <strong>가게명:</strong> <span th:text="${store.name}"></span>
+        </div>
+        
+        <form role="form" th:action="@{/products}" th:object="${productForm}" method="post">
+            <input type="hidden" name="storeId" th:value="${store.id}">
+            
+            <div class="mb-3">
+                <label th:for="name" class="form-label">메뉴명</label>
+                <input type="text" th:field="*{name}" class="form-control"
+                       placeholder="메뉴명을 입력하세요"
+                       th:class="${#fields.hasErrors('name')} ? 'form-control fieldError' : 'form-control'">
+                <p th:if="${#fields.hasErrors('name')}" 
+                   th:errors="*{name}" class="text-danger">Name Error</p>
+            </div>
+            
+            <div class="mb-3">
+                <label th:for="price" class="form-label">가격</label>
+                <input type="number" th:field="*{price}" class="form-control"
+                       placeholder="가격을 입력하세요"
+                       th:class="${#fields.hasErrors('price')} ? 'form-control fieldError' : 'form-control'">
+                <p th:if="${#fields.hasErrors('price')}" 
+                   th:errors="*{price}" class="text-danger">Price Error</p>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">등록하기</button>
+            <a th:href="@{/stores/{id}/products(id=${store.id})}" class="btn btn-secondary">취소</a>
+        </form>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}" />
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}" />
+<body>
+<div class="container">
+    <div th:replace="~{fragments/bodyHeader :: bodyHeader}"/>
+    
+    <div class="py-5">
+        <h2 th:text="${store.name} + ' 메뉴'">메뉴 목록</h2>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <p class="mb-1"><strong>가게명:</strong> <span th:text="${store.name}"></span></p>
+                <p class="mb-0"><strong>주소:</strong> <span th:text="${store.address.address}"></span></p>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <a th:href="@{/stores/{id}/products/new(id=${store.id})}" class="btn btn-primary">
+                메뉴 추가하기
+            </a>
+        </div>
+        
+        <table class="table table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>메뉴명</th>
+                    <th>가격</th>
+                    <th>수정</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="product : ${products}">
+                    <td th:text="${product.name}"></td>
+                    <td th:text="${product.price} + '원'"></td>
+                    <td>
+                        <a th:href="@{/products/{id}/edit(id=${product.id})}" class="btn btn-sm btn-warning">
+                            수정
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <a th:href="@{/stores}" class="btn btn-secondary">가게 목록으로</a>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}" />
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

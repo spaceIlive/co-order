@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>주문 상세</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+</head>
+<body>
+    <nav>
+        <strong>Co-Order</strong> | 
+        <a th:href="@{/}">메인</a> | 
+        <a th:href="@{/posts}">모집글</a> | 
+        <a th:href="@{/orders}">내주문</a> | 
+        <a th:href="@{/stores}">가게목록</a> | 
+        <span th:text="${session.memberName} + '님'"></span>
+        <a th:href="@{/logout}">로그아웃</a>
+    </nav>
+    
+    <hr>
+    
+    <h1>주문 상세</h1>
+    
+    <div style="border: 1px solid #ccc; padding: 15px; margin: 10px 0;">
+        <h2>주문 정보</h2>
+        <p>주문 번호: <span th:text="'#' + ${order.id}"></span></p>
+        <p>가게: <span th:text="${order.store.name}"></span></p>
+        <p>주문자: <span th:text="${order.member.name}"></span></p>
+        <p>주문 일시: <span th:text="${order.createdAt}"></span></p>
+    </div>
+    
+    <div style="border: 1px solid #ccc; padding: 15px; margin: 10px 0;">
+        <h2>배송 정보</h2>
+        <p>배송지: <span th:text="${order.delivery.address.address}"></span> (주문 시점 스냅샷)</p>
+        <p>위치: (<span th:text="${order.delivery.address.latitude}"></span>, <span th:text="${order.delivery.address.longitude}"></span>)</p>
+        <p>그룹 배송 상태: <span th:text="${order.delivery.groupDelivery.status}"></span></p>
+        <p>개별 배송 상태: <span th:text="${order.delivery.status}"></span></p>
+    </div>
+    
+    <div style="border: 1px solid #ccc; padding: 15px; margin: 10px 0;">
+        <h2>주문 상품 목록</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>상품명</th>
+                    <th>개당 가격</th>
+                    <th>수량</th>
+                    <th>소계</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="orderProduct : ${order.orderProducts}">
+                    <td th:text="${orderProduct.product.name}"></td>
+                    <td th:text="${orderProduct.unitPrice} + '원'"></td>
+                    <td th:text="${orderProduct.quantity}"></td>
+                    <td th:text="${orderProduct.unitPrice * orderProduct.quantity} + '원'"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="font-size: 1.2em; font-weight: bold; margin: 20px 0;">
+        총 주문 금액: <span th:text="${order.totalPrice}"></span>원
+    </div>
+    
+    <div>
+        <a th:href="@{/orders}"><button>목록으로</button></a>
+    </div>
+    
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
+

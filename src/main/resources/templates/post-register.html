@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}" />
+<body>
+<div class="container">
+    <div th:replace="~{fragments/bodyHeader :: bodyHeader}"/>
+    
+    <div class="py-5">
+        <h2>모집글 작성</h2>
+        
+        <div class="alert alert-info">
+            <strong>호스트:</strong> <span th:text="${session.memberName}">현재 로그인한 사용자</span>
+        </div>
+        
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+            <strong>오류:</strong> <span th:text="${errorMessage}"></span>
+        </div>
+        
+        <form role="form" th:action="@{/posts}" th:object="${postForm}" method="post" onsubmit="return validateForm()">
+            <div class="mb-3">
+                <label th:for="storeId" class="form-label">가게 선택</label>
+                <select th:field="*{storeId}" class="form-select" id="storeSelect" onchange="loadProducts()"
+                        th:class="${#fields.hasErrors('storeId')} ? 'form-select fieldError' : 'form-select'">
+                    <option value="">가게를 선택하세요</option>
+                    <option th:each="store : ${stores}" 
+                            th:value="${store.id}" 
+                            th:text="${store.name}"></option>
+                </select>
+                <p th:if="${#fields.hasErrors('storeId')}" 
+                   th:errors="*{storeId}" class="text-danger">Store Error</p>
+            </div>
+            
+            <div class="mb-3">
+                <label th:for="deadline" class="form-label">마감 시간</label>
+                <input type="datetime-local" th:field="*{deadline}" class="form-control"
+                       th:class="${#fields.hasErrors('deadline')} ? 'form-control fieldError' : 'form-control'">
+                <p th:if="${#fields.hasErrors('deadline')}" 
+                   th:errors="*{deadline}" class="text-danger">Deadline Error</p>
+            </div>
+            
+            <!-- 상품 선택 영역 -->
+            <div id="productSection" style="display: none;">
+                <h5 class="mb-3">호스트 주문 상품 선택</h5>
+                <div class="card mb-3">
+                    <div class="card-body" id="productList">
+                        <!-- 동적으로 상품 목록 표시 -->
+                    </div>
+                </div>
+                <div class="alert alert-secondary">
+                    <strong>총 주문 금액:</strong> <span id="totalPrice">0</span>원
+                </div>
+                <p th:if="${#fields.hasErrors('productQuantities')}" 
+                   th:errors="*{productQuantities}" class="text-danger">Product Error</p>
+            </div>
+            
+            <div class="alert alert-warning">
+                <p class="mb-1"><strong>📌 안내 사항</strong></p>
+                <p class="mb-0">• 최소 인원은 가게 거리에 따라 자동으로 계산됩니다.</p>
+                <p class="mb-0">• 모집글 작성 시 호스트도 상품을 선택해야 합니다.</p>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">작성하기</button>
+            <a th:href="@{/posts}" class="btn btn-secondary">취소</a>
+        </form>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}" />
+</div>
+
+<script>
+let products = [];
+
+async function loadProducts() {
+    const storeId = document.getElementById('storeSelect').value;
+    const productSection = document.getElementById('productSection');
+    const productList = document.getElementById('productList');
+    
+    if (!storeId) {
+        productSection.style.display = 'none';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/stores/${storeId}/products`);
+        products = await response.json();
+        
+        if (products.length === 0) {
+            productList.innerHTML = '<p class="text-muted">등록된 상품이 없습니다.</p>';
+            productSection.style.display = 'block';
+            return;
+        }
+        
+        let html = '';
+        products.forEach(product => {
+            html += `
+                <div class="row align-items-center mb-3 pb-3 border-bottom">
+                    <div class="col-md-1 text-center">
+                        <input type="checkbox" class="form-check-input" 
+                               id="check_${product.id}" 
+                               onclick="toggleQuantity(${product.id})"
+                               style="width: 20px; height: 20px;">
+                    </div>
+                    <div class="col-md-5">
+                        <h6 class="mb-1">${product.name}</h6>
+                        <span class="text-primary fw-bold">${product.price.toLocaleString()}원</span>
+                        <input type="hidden" id="price_${product.id}" value="${product.price}">
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <label class="input-group-text">수량</label>
+                            <input type="number" class="form-control" 
+                                   id="quantity_${product.id}" 
+                                   name="productQuantities[${product.id}]"
+                                   min="0" value="0" disabled 
+                                   onchange="calculateTotal()"
+                                   style="text-align: center;">
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <strong>소계:</strong> 
+                        <span class="text-success fw-bold" id="subtotal_${product.id}">0</span>원
+                    </div>
+                </div>
+            `;
+        });
+        
+        productList.innerHTML = html;
+        productSection.style.display = 'block';
+        
+    } catch (error) {
+        console.error('상품 로드 실패:', error);
+        productList.innerHTML = '<p class="text-danger">상품을 불러오는데 실패했습니다.</p>';
+        productSection.style.display = 'block';
+    }
+}
+
+function toggleQuantity(productId) {
+    const checkbox = document.getElementById('check_' + productId);
+    const quantityInput = document.getElementById('quantity_' + productId);
+    
+    if (checkbox.checked) {
+        quantityInput.disabled = false;
+        quantityInput.value = 1;
+    } else {
+        quantityInput.disabled = true;
+        quantityInput.value = 0;
+    }
+    calculateTotal();
+}
+
+function calculateTotal() {
+    let total = 0;
+    
+    products.forEach(product => {
+        const quantity = parseInt(document.getElementById('quantity_' + product.id).value) || 0;
+        const price = parseInt(document.getElementById('price_' + product.id).value) || 0;
+        const subtotal = quantity * price;
+        
+        document.getElementById('subtotal_' + product.id).textContent = subtotal.toLocaleString();
+        total += subtotal;
+    });
+    
+    document.getElementById('totalPrice').textContent = total.toLocaleString();
+}
+
+function validateForm() {
+    const storeId = document.getElementById('storeSelect').value;
+    if (!storeId) {
+        alert('가게를 선택해주세요.');
+        return false;
+    }
+    
+    const total = parseInt(document.getElementById('totalPrice').textContent.replace(/,/g, ''));
+    if (total === 0) {
+        alert('최소 1개 이상의 상품을 선택해주세요.');
+        return false;
+    }
+    
+    return true;
+}
+
+// 페이지 로드 시 가게가 선택되어 있으면 자동으로 상품 로드
+window.addEventListener('DOMContentLoaded', function() {
+    const storeId = document.getElementById('storeSelect').value;
+    if (storeId) {
+        loadProducts();
+    }
+});
+</script>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

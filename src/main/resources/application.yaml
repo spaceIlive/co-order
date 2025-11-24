@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/jpashop
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      #애플리케이션 실행 시점에 테이블을 drop 하고, 다시 생성한다.
+      ddl-auto: create
+    properties:
+      hibernate:
+        # 얘는 시스템아웃을 통해 에러메시지 찍는거고
+        show_sql: true
+        format_sql: true
+    # data.sql 자동 실행 설정
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data.sql
+logging.level:
+  #얘는 로거를 통해서 로그 찍는거
+  org.hibernate.SQL: debug
+  org.hibernate.orm.jdbc.bind: trace

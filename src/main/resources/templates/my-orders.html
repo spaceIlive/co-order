@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}" />
+<body>
+<div class="container">
+    <div th:replace="~{fragments/bodyHeader :: bodyHeader}"/>
+    
+    <div class="py-5">
+        <h2 class="mb-4">내 주문</h2>
+        
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <!-- 모집중 -->
+        <div class="mb-5">
+            <h3 class="mb-3">
+                <span class="badge bg-primary">모집중</span>
+            </h3>
+            
+            <div th:if="${openList != null and !openList.isEmpty()}">
+                <div th:each="p : ${openList}" class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="mb-2">
+                                    <span class="badge bg-primary me-2">🏪</span>
+                                    <span th:text="${p.post.store.name}"></span>
+                                </h5>
+                                <div class="d-flex gap-4">
+                                    <span>
+                                        <strong>👥 참여인원:</strong> 
+                                        <span th:text="${p.post.currentParticipants}"></span>명 참여 중 
+                                        <span class="text-muted">(최소 <span th:text="${p.post.minParticipants}"></span>명 필요)</span>
+                                    </span>
+                                    <span>
+                                        <strong>⏰ 마감:</strong> 
+                                        <span th:text="${#temporals.format(p.post.deadline, 'MM-dd HH:mm')}"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="badge bg-success fs-6 me-2">진행중</span>
+                                <form th:action="@{/participations/{participationId}/cancel(participationId=${p.id})}" 
+                                      method="post" 
+                                      style="display: inline;"
+                                      onsubmit="return confirm('정말 참여를 취소하시겠습니까?');">
+                                    <button type="submit" class="btn btn-danger btn-sm">취소</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${openList == null or openList.isEmpty()}" class="alert alert-info">
+                모집중인 주문이 없습니다.
+            </div>
+        </div>
+        
+        <!-- 모집완료 -->
+        <div class="mb-5">
+            <h3 class="mb-3">
+                <span class="badge bg-success">모집완료</span>
+            </h3>
+            
+            <div th:if="${completedList != null and !completedList.isEmpty()}">
+                <div th:each="p : ${completedList}" class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="mb-2">
+                                    <span class="badge bg-success me-2">✓</span>
+                                    <span th:text="${p.post.store.name}"></span>
+                                </h5>
+                                <div class="d-flex gap-4">
+                                    <span>
+                                        <strong>👥 참여인원:</strong> 
+                                        <span th:text="${p.post.currentParticipants}"></span>명 참여 중 
+                                        <span class="text-muted">(최소 <span th:text="${p.post.minParticipants}"></span>명 필요)</span>
+                                    </span>
+                                    <span>
+                                        <strong>⏰ 마감:</strong> 
+                                        <span th:text="${#temporals.format(p.post.deadline, 'MM-dd HH:mm')}"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span th:if="${p.post.status.name() == 'ORDERED'}" 
+                                      class="badge bg-success fs-6">주문완료</span>
+                                <span th:if="${p.post.status.name() == 'WAITING_ORDER'}" 
+                                      class="badge bg-warning fs-6">주문대기</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${completedList == null or completedList.isEmpty()}" class="alert alert-info">
+                완료된 주문이 없습니다.
+            </div>
+        </div>
+        
+        <!-- 취소됨 (접어두기) -->
+        <div class="mb-5">
+            <details>
+                <summary class="text-muted small" style="cursor: pointer;">
+                    <span class="badge bg-secondary">취소된 주문 보기</span>
+                    (<span th:text="${cancelledList != null ? cancelledList.size() : 0}"></span>건)
+                </summary>
+                
+                <div class="mt-3">
+                    <div th:if="${cancelledList != null and !cancelledList.isEmpty()}">
+                        <div th:each="p : ${cancelledList}" class="card mb-2 bg-light">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-10">
+                                        <h6 class="mb-1 text-muted">
+                                            <span th:text="${p.post.store.name}"></span>
+                                        </h6>
+                                        <small class="text-muted">
+                                            마감: <span th:text="${#temporals.format(p.post.deadline, 'MM-dd HH:mm')}"></span>
+                                        </small>
+                                    </div>
+                                    <div class="col-md-2 text-end">
+                                        <span class="badge bg-secondary">취소</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${cancelledList == null or cancelledList.isEmpty()}" class="text-muted small">
+                        취소된 주문이 없습니다.
+                    </div>
+                </div>
+            </details>
+        </div>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}" />
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
+

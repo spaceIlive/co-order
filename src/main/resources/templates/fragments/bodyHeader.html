@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="bodyHeader">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" th:href="@{/}">Co-Order</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/}">메인</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/posts}">모집글</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/orders}">내주문</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/stores}">가게목록</a>
+                    </li>
+                </ul>
+                <span class="navbar-text me-3" th:if="${session.memberName}">
+                    <span th:text="${session.memberName}"></span>님
+                </span>
+                <a class="btn btn-outline-danger btn-sm" th:href="@{/logout}" th:if="${session.memberName}">로그아웃</a>
+            </div>
+        </div>
+    </nav>
+</div>
+</body>
+</html>
+

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}" />
+<body>
+<div class="container">
+    <div th:replace="~{fragments/bodyHeader :: bodyHeader}"/>
+    
+    <div class="py-5">
+        <h2 class="mb-4">모집 참여</h2>
+        
+        <!-- 모집글 정보 -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">모집글 정보</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>가게:</strong> <span th:text="${post.store.name}"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>마감시간:</strong> <span th:text="${#temporals.format(post.deadline, 'MM-dd HH:mm')}"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>현재 인원:</strong> 
+                        <span th:text="${post.currentParticipants}"></span>명 참여 중 
+                        <span class="text-muted">(최소 <span th:text="${post.minParticipants}"></span>명 필요)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 상품 선택 폼 -->
+        <form th:action="@{/posts/{postId}/participations(postId=${post.id})}" method="post" onsubmit="return validateForm()">
+            <input type="hidden" name="postId" th:value="${post.id}">
+            
+            <!-- 에러 메시지 표시 -->
+            <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">상품 선택</h5>
+                </div>
+                <div class="card-body">
+                    <div th:each="product : ${products}" class="row align-items-center mb-3 pb-3 border-bottom">
+                        <div class="col-md-1 text-center">
+                            <input type="checkbox" class="form-check-input" 
+                                   th:id="'check_' + ${product.id}" 
+                                   th:onclick="'toggleQuantity(' + ${product.id} + ')'"
+                                   style="width: 20px; height: 20px;">
+                        </div>
+                        <div class="col-md-5">
+                            <h6 class="mb-1" th:text="${product.name}"></h6>
+                            <span class="text-primary fw-bold" th:text="${product.price} + '원'"></span>
+                            <input type="hidden" th:id="'price_' + ${product.id}" th:value="${product.price}">
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <label class="input-group-text">수량</label>
+                                <input type="number" class="form-control" 
+                                       th:id="'quantity_' + ${product.id}" 
+                                       th:name="'productQuantities[' + ${product.id} + ']'"
+                                       min="0" value="0" disabled 
+                                       onchange="calculateTotal()"
+                                       style="text-align: center;">
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <strong>소계:</strong> 
+                            <span class="text-success fw-bold" th:id="'subtotal_' + ${product.id}">0</span>원
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 가격 요약 -->
+            <div class="card mb-4">
+                <div class="card-body bg-light">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>총 상품 금액: <span class="text-primary" id="totalPrice">0</span>원</h5>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <h5>예상 배달비: <span class="text-danger" th:text="${expectedDeliveryFee}">0</span>원</h5>
+                            <small class="text-muted">
+                                (<span th:text="${post.currentParticipants + 1}"></span>명 기준)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-primary btn-lg">참여하기</button>
+                <a th:href="@{/posts}" class="btn btn-secondary btn-lg">취소</a>
+            </div>
+        </form>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}" />
+</div>
+
+<script th:inline="javascript">
+    const products = /*[[${products}]]*/ [];
+    
+    function toggleQuantity(productId) {
+        const checkbox = document.getElementById('check_' + productId);
+        const quantityInput = document.getElementById('quantity_' + productId);
+        
+        if (checkbox.checked) {
+            quantityInput.disabled = false;
+            quantityInput.value = 1;
+        } else {
+            quantityInput.disabled = true;
+            quantityInput.value = 0;
+        }
+        calculateTotal();
+    }
+    
+    function calculateTotal() {
+        let total = 0;
+        
+        products.forEach(product => {
+            const quantity = parseInt(document.getElementById('quantity_' + product.id).value) || 0;
+            const price = parseInt(document.getElementById('price_' + product.id).value) || 0;
+            const subtotal = quantity * price;
+            
+            document.getElementById('subtotal_' + product.id).textContent = subtotal.toLocaleString();
+            total += subtotal;
+        });
+        
+        document.getElementById('totalPrice').textContent = total.toLocaleString();
+    }
+    
+    function validateForm() {
+        const total = parseInt(document.getElementById('totalPrice').textContent.replace(/,/g, ''));
+        if (total === 0) {
+            alert('최소 1개 이상의 상품을 선택해주세요.');
+            return false;
+        }
+        return true;
+    }
+</script>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

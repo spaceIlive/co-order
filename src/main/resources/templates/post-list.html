@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}" />
+<body>
+<div class="container">
+    <div th:replace="~{fragments/bodyHeader :: bodyHeader}"/>
+    
+    <div class="py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">주변 모집글</h2>
+            <a th:href="@{/posts/new}" class="btn btn-success btn-lg">모집글 올리기</a>
+        </div>
+        
+        <div th:if="${posts != null and !posts.isEmpty()}">
+            <div th:each="post : ${posts}" class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-2">
+                                <span class="badge bg-primary me-2">🏪</span>
+                                <span th:text="${post.store.name}"></span>
+                            </h5>
+                            <div class="d-flex gap-4">
+                                <span>
+                                    <strong>👥 참여인원:</strong> 
+                                    <span th:text="${post.currentParticipants}"></span>명 참여 중 
+                                    <span class="text-muted">(최소 <span th:text="${post.minParticipants}"></span>명 필요)</span>
+                                </span>
+                                <span>
+                                    <strong>⏰ 마감:</strong> 
+                                    <span th:text="${#temporals.format(post.deadline, 'MM-dd HH:mm')}"></span>
+                                </span>
+                                <span>
+                                    <strong>📌 상태:</strong>
+                                    <span class="badge bg-success" th:text="${post.status}"></span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a th:href="@{/posts/{id}/participations/new(id=${post.id})}" 
+                               class="btn btn-primary btn-lg">
+                                참여하기
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div th:if="${posts == null or posts.isEmpty()}" class="alert alert-info">
+            현재 모집 중인 글이 없습니다.
+        </div>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}" />
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

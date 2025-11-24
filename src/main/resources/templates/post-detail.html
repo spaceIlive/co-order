@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>모집글 상세</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+</head>
+<body>
+    <nav>
+        <strong>Co-Order</strong> | 
+        <a th:href="@{/}">메인</a> | 
+        <a th:href="@{/posts}">모집글</a> | 
+        <a th:href="@{/orders}">내주문</a> | 
+        <a th:href="@{/stores}">가게목록</a> | 
+        <span th:text="${session.memberName} + '님'"></span>
+        <a th:href="@{/logout}">로그아웃</a>
+    </nav>
+    
+    <hr>
+    
+    <h1>모집글 상세</h1>
+    
+    <div style="border: 1px solid #ccc; padding: 15px; margin: 10px 0;">
+        <h2>모집글 정보</h2>
+        <p>가게: <span th:text="${post.store.name}"></span></p>
+        <p>호스트: <span th:text="${post.host.name}"></span></p>
+        <p>마감 시간: <span th:text="${post.deadline}"></span></p>
+        <p>상태: <span th:text="${post.status}"></span></p>
+    </div>
+    
+    <div style="border: 1px solid #ccc; padding: 15px; margin: 10px 0;">
+        <h2>인원 및 배달비 정보</h2>
+        <p>👥 현재 참여 인원: <span th:text="${post.currentParticipants}"></span>명 / 최소 필요 인원: <span th:text="${post.minParticipants}"></span>명</p>
+        <p>💰 현재 1인당 배달비: <span th:text="${currentDeliveryFee}">0</span>원</p>
+        <p th:if="${newDeliveryFee != null}">✨ 지금 참여하면 1인당 배달비: <span th:text="${newDeliveryFee}"></span>원 (<span th:text="${currentDeliveryFee - newDeliveryFee}"></span>원 절약!)</p>
+    </div>
+    
+    <div style="border: 1px solid #ccc; padding: 15px; margin: 10px 0;">
+        <h2>참여자 목록</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>참여자</th>
+                    <th>주문 예정 메뉴</th>
+                    <th>총 금액</th>
+                    <th>상태</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="participation : ${participations}">
+                    <td th:text="${participation.member.name}"></td>
+                    <td>
+                        <span th:each="pp, iterStat : ${participation.participationProducts}">
+                            <span th:text="${pp.product.name} + ' x' + ${pp.quantity}"></span>
+                            <span th:if="${!iterStat.last}">, </span>
+                        </span>
+                    </td>
+                    <td th:text="${participation.totalPrice} + '원'"></td>
+                    <td th:text="${participation.status}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div>
+        <div th:if="${post.status.toString() == 'OPEN'}">
+            <div th:if="${!isParticipating}">
+                <a th:href="@{/posts/{id}/participations/new(id=${post.id})}">
+                    <button>참여하기</button>
+                </a>
+            </div>
+            <div th:if="${isParticipating}">
+                <form th:action="@{/participations/{id}/cancel(id=${myParticipationId})}" method="post">
+                    <button type="submit">참여 취소</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div>
+        <a th:href="@{/posts}"><button>목록으로</button></a>
+    </div>
+    
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
+

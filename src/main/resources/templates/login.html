@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}" />
+<body>
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <h2 class="text-center mb-4">로그인</h2>
+            
+            <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                <p th:if="${param.error[0] == 'notfound'}" class="mb-0">등록되지 않은 아이디입니다.</p>
+                <p th:if="${param.error[0] == 'wrongpassword'}" class="mb-0">비밀번호가 틀렸습니다.</p>
+            </div>
+            
+            <form th:action="@{/login}" method="post">
+                <div class="mb-3">
+                    <label for="name" class="form-label">아이디 (이름)</label>
+                    <input type="text" name="name" id="name" class="form-control" 
+                           placeholder="아이디를 입력하세요" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">비밀번호</label>
+                    <input type="password" name="password" id="password" class="form-control" 
+                           placeholder="비밀번호를 입력하세요" required>
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">로그인</button>
+                    <a th:href="@{/members/new}" class="btn btn-outline-secondary">회원가입</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
