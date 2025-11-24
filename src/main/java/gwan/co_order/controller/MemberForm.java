@@ -2,6 +2,7 @@ package gwan.co_order.controller;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,8 +20,10 @@ public class MemberForm {
     @NotEmpty(message = "주소는 필수입니다")
     private String address;
     
+    @NotNull(message = "위도는 필수입니다")
     private Double latitude;
     
+    @NotNull(message = "경도는 필수입니다")
     private Double longitude;
     
     // 비밀번호 확인 검증
