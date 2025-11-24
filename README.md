@@ -554,7 +554,7 @@ Order N개 (개별 주문)
 
 #### 1. 프로젝트 클론
 ```bash
-git clone <repository-url>
+git clone https://github.com/spaceIlive/co-order.git
 cd co-order
 ```
 
